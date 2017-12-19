@@ -24,4 +24,4 @@ var Todo = mongoose.model('Todo', {
   }
 });
 
-module.exports = {User};
+module.exports = {Todo};
