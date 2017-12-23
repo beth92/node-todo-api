@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose');
 
-//create a mongoose mode for a todo item
+//create a mongoose model for a todo item
 // mongoose.model returns a constructor which can be used to add to db
 var Todo = mongoose.model('Todo', {
   text: {
