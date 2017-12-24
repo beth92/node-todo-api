@@ -1,12 +1,13 @@
 /* jshint esversion: 6 */
 //library imports
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
 //local imports
-var {mongoose} = require('./db/mongoose');
-var {Todo} = require('./models/todo');
-var {User} = require('./models/user');
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo');
+const {User} = require('./models/user');
 
 var app = express();
 
@@ -34,6 +35,30 @@ app.get('/todos', (req, res) => {
     res.send({todos});
   }, (e) => {
     res.status(400).send(e);
+  });
+});
+
+// GET arbitrary todo
+// use colon : syntax with app.get to represent params
+// creates a req.params object with key values
+app.get('/todos/:id', (req, res) => {
+  let id = req.params.id;
+  // valid id using isValid
+  if (!ObjectID.isValid(id)){
+    res.status(400).send({});
+    return;
+  }
+  // findById
+  Todo.findById(id).then((todo) => {
+    // check for empty result set
+    if(!todo){
+      res.status(404).send();
+      return;
+    }
+    // else send back object containing the todo document
+    res.status(200).send({todo});
+  }).catch((e) => {
+    res.status(400).send();
   });
 });
 
