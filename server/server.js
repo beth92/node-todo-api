@@ -63,6 +63,28 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
+// Setup route for handling delete requests
+app.delete('/todos/:id', (req, res) => {
+  // get id
+  let id = req.params.id;
+  // check validity and if invalid send bad request status
+  if (!ObjectID.isValid(id)){
+    res.status(400).send();
+    return;
+  }
+  // else remove from db
+  Todo.findByIdAndRemove(id)
+  .then( (todo) => {
+    if(!todo) {
+      res.status(404).send();
+      return;
+    }
+    res.status(200).send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 } );
