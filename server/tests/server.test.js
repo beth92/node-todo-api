@@ -12,7 +12,9 @@ const todos = [{
   text: 'First test todo'
 }, {
   _id: new ObjectID(),
-  text: 'Second test todo'
+  text: 'Second test todo',
+  completed: true,
+  completedAt: 12345
 }];
 
 // start with 0 todos
@@ -20,7 +22,8 @@ beforeEach((done) => {
   // add some seed data for testing
   Todo.remove({}).then(() => {
     return Todo.insertMany(todos);
-  }).then(() => done());
+  }).then(() => done())
+  .catch((e) => done(e));
 });
 
 describe('POST /todos', () => {
@@ -53,7 +56,7 @@ describe('POST /todos', () => {
       });
     });
 
-    // second test case
+    // test with empty request body
     it('should not create todo with invalid data', (done) => {
 
       request(app)
@@ -159,5 +162,63 @@ describe('DELETE /todos/:id', () => {
     .delete('/todos/123')
     .expect(400)
     .end(done);
+  });
+});
+
+describe('PATCH /todos/:id', () => {
+  it('should update the todo', (done) => {
+    // use id of first item
+    let id = todos[0]._id.toHexString();
+    let newText = 'Testing updates to text';
+    
+    request(app)
+    .patch(`/todos/${id}`)
+    .send({
+      // update text, set completed to true
+      text: newText,
+      completed: true
+    })
+    .expect(200)
+    // text is changed, completed is true, completedAt is a number
+    .expect( (res) => {
+      expect(res.body.todo.text).toBe(newText);
+      expect(res.body.todo.completed).toBe(true);
+      expect(res.body.todo.completedAt).toBeA('number');
+    })
+    .end( (err, res) => {
+      if(err) {
+        done(err);
+      } else {
+        done();
+      }
+    });
+  });
+
+  // beforeEach runs now so changes above will not hold
+  it('should clear completedAt when todo is un-completed', (done) => {
+    // grab id of second item
+    let id = todos[1]._id.toHexString();
+    let newText = 'Testing updates to text a second time';
+    request(app)
+    .patch(`/todos/${id}`)
+    .send({
+      // update text, set completed to false
+      text: newText,
+      completed: false
+    })
+    .expect(200)
+    // text is changed, completed is false, completedAd is null (toNotExist)
+    .expect( (res) => {
+      expect(res.body.todo.text).toBe(newText);
+      expect(res.body.todo.completed).toBe(false);
+      expect(res.body.todo.completedAt).toNotExist();
+    })
+    .end((err, res) => {
+      if(err) {
+        done(err);
+      } else {
+        done();
+      }
+    });
   });
 });
