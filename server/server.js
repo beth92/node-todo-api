@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 
-require('./config.config');
+require('./config/config');
 
 //library imports
 const _ = require('lodash');
