@@ -1,5 +1,6 @@
 /* jshint esversion: 6 */
 //library imports
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -82,6 +83,37 @@ app.delete('/todos/:id', (req, res) => {
     res.status(200).send({todo});
   }).catch((e) => {
     res.status(400).send();
+  });
+});
+
+// use app.patch to update a resource (best practices for API dev)
+app.patch('/todos/:id', (req, res) => {
+  let id = req.params.id;
+  // only allow users to change text or completed
+  let body = _.pick(req.body, ['text', 'completed']);
+  // check that object id is valid
+  if (!ObjectID.isValid(id)){
+    res.status(400).send({});
+    return;
+  }
+
+  // check that completed field is boolean and check value
+  if(_.isBoolean(body.completed) && body.completed){
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  }
+  // the new option returns the new record
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true})
+  .then( (todo) => {
+    if (!todo) {
+      return res.status(404).send();
+    }
+    res.send({todo});
+  })
+  .catch((e)=>{
+    res.status(400).send({message: 'Something went wrong'});
   });
 });
 
