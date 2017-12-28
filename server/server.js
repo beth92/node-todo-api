@@ -120,6 +120,24 @@ app.patch('/todos/:id', (req, res) => {
   });
 });
 
+// POST /users
+app.post('/users', (req, res) => {
+  let user = new User(_.pick(req.body, ['email', 'password']));
+
+
+
+  // submit to mongodb for validation
+  user.save().then(() => {
+    return user.generateAuthToken();
+  })
+  .then((token) => {
+    // prepend custom header with x-
+    res.status(200).header('x-auth', token).send({user});
+  })
+  .catch((e) => res.status(400).send(e));
+});
+
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 } );
