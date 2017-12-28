@@ -73,6 +73,31 @@ UserSchema.methods.generateAuthToken = function () {
   });
 };
 
+// define getUserByToken for verification of tokens
+// statics = model method rather than instance method
+// meaning that 'this' is a ref to model rather than the doc
+UserSchema.statics.findByToken = function(token) {
+  let User = this;
+  let decoded;
+
+  try {
+    // verify using secret from generateAuthToken
+    decoded = jwt.verify(token, 'abc123');
+  } catch (e) {
+    // if verification fails return a rejection to findByToken
+    // this is caught by the route in server.js and
+    // results in a 401 
+    return Promise.reject();
+  }
+
+  return User.findOne({
+    // use the dot notation below to query nested docs
+    '_id': decoded._id,
+    'tokens.token': token,
+    'tokens.access': 'auth'
+  });
+};
+
 var User = mongoose.model('User', UserSchema);
 
 module.exports = {User};
