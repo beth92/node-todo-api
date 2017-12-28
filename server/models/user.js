@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 // example user
 // {
@@ -86,7 +87,7 @@ UserSchema.statics.findByToken = function(token) {
   } catch (e) {
     // if verification fails return a rejection to findByToken
     // this is caught by the route in server.js and
-    // results in a 401 
+    // results in a 401
     return Promise.reject();
   }
 
@@ -97,6 +98,25 @@ UserSchema.statics.findByToken = function(token) {
     'tokens.access': 'auth'
   });
 };
+
+// run some code before save events to hash pw before storing
+UserSchema.pre('save', function (next) {
+  let user = this;
+
+  // isModified can tell us whether a prop has just been changed
+  if(user.isModified('password')){
+    // user.password
+
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(user.password, salt, (err, hash) => {
+        user.password = hash;
+        next();
+      });
+    });
+  } else {
+    next();
+  }
+});
 
 var User = mongoose.model('User', UserSchema);
 
