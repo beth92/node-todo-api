@@ -149,6 +149,23 @@ app.get('/users/me', authenticate, (req, res) => {
   });
 });
 
+// POST /users/login {email, password}
+
+// whose hashed password compares to plaintext password using brypt compare
+app.post('/users/login', (req, res) => {
+  let body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password)
+  .then((user) => {
+    user.generateAuthToken().then((token) => {
+      res.set('x-auth', token).send(user);
+    });
+  })
+  .catch( (e) => {
+    res.status(400).send();
+  });
+});
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 } );
