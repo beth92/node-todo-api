@@ -57,6 +57,17 @@ UserSchema.methods.toJSON = function () {
   return _.pick(userObject, ['_id', 'email']);
 };
 
+UserSchema.methods.removeToken = function(token) {
+  // use mongodb $pull operator to remove items from an array according to criteria
+  let user = this;
+
+  return user.update({
+    $pull: {
+      tokens: {token}
+    }
+  });
+};
+
 // create new 'instance method' which has access to docs
 // must use function keyword since we need this binding
 UserSchema.methods.generateAuthToken = function () {
