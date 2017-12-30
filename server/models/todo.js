@@ -21,6 +21,10 @@ var Todo = mongoose.model('Todo', {
     // UNIX timestamp type aka a number
     type: Number,
     default: null
+  },
+  _creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
   }
 });
 
