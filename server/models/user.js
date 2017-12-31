@@ -76,7 +76,7 @@ UserSchema.methods.generateAuthToken = function () {
   let token = jwt.sign({
     _id: user._id.toHexString(),
     access
-  }, 'abc123').toString();
+  }, process.env.JWT_SECRET).toString();
 
   user.tokens.push({access, token});
 
@@ -94,7 +94,7 @@ UserSchema.statics.findByToken = function(token) {
 
   try {
     // verify using secret from generateAuthToken
-    decoded = jwt.verify(token, 'abc123');
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
   } catch (e) {
     // if verification fails return a rejection to findByToken
     // this is caught by the route in server.js and
