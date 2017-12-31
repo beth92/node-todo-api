@@ -6,16 +6,6 @@ const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
-// example user
-// {
-//   email: 'beth@example.com',
-//   password: 'jdsjabyhskefhw7452ihddugs',
-//   tokens: [{
-//      access: 'auth',
-//      token: '1kwiusva87329uhiw678UHDSU'
-//   }, {}, {}]
-// }
-
 var UserSchema = new mongoose.Schema({
   email: {
     type: String,
