@@ -23,3 +23,5 @@ Prerequisites for development:
 <li>To run unit tests: `npm test` (without server running)</li><br>
 <li>To run unit tests and watch for changes: `npm run test-watch`</li><br>
 </ol>
+<h3> Deploying </h3>
+Requires installation of heroku CLI tools. Once authenticated, run `heroku git:remote -a <project-name>` to add the deploy as a remote and then run `git push heroku` to push changes to production and redeploy. 
