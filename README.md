@@ -6,4 +6,20 @@
 
 Credit for design of the project to Andrew J Mead (course author). </p>
 
-<!-- TODO: <h2> Description </h2> --> 
+<h3>Getting started</h3>
+
+Prerequisites for development:
+- NodeJS v8 or above
+- npm package manager
+- mongoDB
+
+<ol>
+<li> Clone the repo and run `npm install` to fetch npm dependencies </li> <br>
+<li>Set up config.json file under `server/config/` to establish node environment variables (see `server/config/config.js`). Required are port for local server and MongoDB as well as JWT secret required by jwt library for auth token generation (see `server/models/users.js`)
+</li> <br>
+<li>Start mongoDB locally (see <a href='https://docs.mongodb.com/manual/reference/program/mongo/#mongo-usage-examples'>MongoDB documentation</a> for OS specific instructions.)</li><br>
+<li>Start the local server with `node server/server.js`</li><br>
+<li>To listen for local changes and restart server upon save run `nodemon server/server.js` instead</li><br>
+<li>To run unit tests: `npm test` (without server running)</li><br>
+<li>To run unit tests and watch for changes: `npm run test-watch`</li><br>
+</ol>
