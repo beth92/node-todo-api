@@ -1,4 +1,4 @@
-/* jshint esversion: 6 */
+/* jshint ignore:start */
 
 require('./config/config');
 
@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 
 // listen for post requests to /todos path
 app.post('/todos', authenticate, (req, res) => {
-  var todo = new Todo({
+  const todo = new Todo({
     text: req.body.text,
     _creator: req.user._id
   });
@@ -75,28 +75,28 @@ app.get('/todos/:id', authenticate, (req, res) => {
 });
 
 // Setup route for handling delete requests
-app.delete('/todos/:id', authenticate, (req, res) => {
+app.delete('/todos/:id', authenticate, async (req, res) => {
   // get id
-  let id = req.params.id;
-  // check validity and if invalid send bad request status
-  if (!ObjectID.isValid(id)){
-    res.status(400).send();
-    return;
-  }
-  // else remove from db
-  Todo.findOneAndRemove({
-    _id: id,
-    _creator: req.user._id
-  })
-  .then( (todo) => {
+  try {
+    const id = req.params.id;
+    // check validity and if invalid send bad request status
+    if (!ObjectID.isValid(id)){
+      res.status(400).send();
+      return;
+    }
+    // else remove from db
+    const todo = await Todo.findOneAndRemove({
+      _id: id,
+      _creator: req.user._id
+    });
     if(!todo) {
       res.status(404).send();
       return;
     }
     res.status(200).send({todo});
-  }).catch((e) => {
+  } catch (e) {
     res.status(400).send();
-  });
+  }
 });
 
 // use app.patch to update a resource (best practices for API dev)
@@ -134,20 +134,24 @@ app.patch('/todos/:id', authenticate, (req, res) => {
 });
 
 // POST /users
-app.post('/users', (req, res) => {
-  let user = new User(_.pick(req.body, ['email', 'password']));
-
-
-
+app.post('/users', async (req, res) => {
+  const user = new User(_.pick(req.body, ['email', 'password']));
   // submit to mongodb for validation
-  user.save().then(() => {
-    return user.generateAuthToken();
-  })
-  .then((token) => {
-    // prepend custom header with x-
+  try {
+    await user.save();
+    const token = user.generateAuthToken();
     res.status(200).header('x-auth', token).send({user});
-  })
-  .catch((e) => res.status(400).send(e));
+  } catch (e) {
+    res.status(400).send(e);
+  }
+  // user.save().then(() => {
+  //   return user.generateAuthToken();
+  // })
+  // .then((token) => {
+  //   // prepend custom header with x-
+  //   res.status(200).header('x-auth', token).send({user});
+  // })
+  // .catch((e) => res.status(400).send(e));
 });
 
 // GET current user
@@ -162,28 +166,26 @@ app.get('/users/me', authenticate, (req, res) => {
 });
 
 // POST /users/login {email, password}
-app.post('/users/login', (req, res) => {
-  let body = _.pick(req.body, ['email', 'password']);
-
-  User.findByCredentials(body.email, body.password)
-  .then((user) => {
-    user.generateAuthToken().then((token) => {
-      res.set('x-auth', token).send(user);
-    });
-  })
-  .catch( (e) => {
+app.post('/users/login', async (req, res) => {
+  try {
+    const body = _.pick(req.body, ['email', 'password']);
+    const user = await User.findByCredentials(body.email, body.password);
+    const token = await user.generateAuthToken();
+    res.set('x-auth', token).send(user);
+  } catch (e) {
     res.status(400).send();
-  });
+  }
 });
 
 // logout
-app.delete('/users/me/token', authenticate, (req, res) => {
+app.delete('/users/me/token', authenticate, async (req, res) => {
   // authenticate function sets req.user and req.token
-  req.user.removeToken(req.token).then(() => {
+  try {
+    await req.user.removeToken(req.token);
     res.status(200).send();
-  }, (e) => {
+  } catch (e) {
     res.status(400).send();
-  });
+  }
 });
 
 app.listen(port, () => {
@@ -191,3 +193,4 @@ app.listen(port, () => {
 } );
 
 module.exports = {app};
+/* jshint ignore:end */
